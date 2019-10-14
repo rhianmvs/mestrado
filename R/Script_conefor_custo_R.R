@@ -8,50 +8,65 @@ library(maptools)
 library(rJava)
 library(RArcInfo)
 
-rio_de_janeiro<-raster("C:/Users/Rhian/Documents/Biblioteca/Shapes&raster/Rio_de_Janeiro/mapbiomas-riodejaneiro-riodejaneiro-2018.tif") #imputando meu mapa do mapbiomas
+#imputando meu mapa do mapbiomas
+rio_de_janeiro<-raster("C:/Users/Rhian/Documents/Biblioteca/Shapes&raster/Rio_de_Janeiro/mapbiomas-riodejaneiro-riodejaneiro-2018.tif")
 
 rio_de_janeiro
-
-
-##preciso saber como eu vejo a tabela de atributos com os valores dos pixels
-
 plot(rio_de_janeiro)
 
-paisagem2 <- paisagem
-paisagem2[paisagem2[]>1]<-NA  #tudo o que não for fragmento florestal fica de fora. Tudo > 1 vira NA
+##COMO VER OS VALORES DA TA
 
-plot(paisagem2)
+#reclassificando a TA (vi no ArcMap)
+#precisa criar uma matriz com os valores antigos, os novos e o nº de linhas e colunas
+matriz_reclass_calphi<-matrix(data=c(0,3,5,13,15,19,21,23,24,25,29,30,32,33,NA,1,2,3,4,4,4,5,6,7,8,9,2,10),nrow=14,ncol=2) #valores para caluromys philander
 
-manchas <- clump(paisagem2) #diferencia as manchas existentes na paisagem
-plot(manchas)
+reclassify(x = rio_de_janeiro, #objeto raster
+           rcl = matriz_reclass_calphi, #matriz criada com os valores de origem e destino
+           filename="rj_raster_calphi") #nome do arquivo de output
 
-n.manchas <- max(unique(manchas)) #só um comando que mostra que o clump deu certo e possuem 3 manchas na paisagem modelo; preciso para o looping!!!
+##Leitura do novo raster reclassificado (precisa puxar ele na pasta de origem onde ele é salvo)
+rj_raster_calphi<-raster("C:/Users/Rhian/Documents/Mestrado/Mestrado_serio/rj_raster_calphi.grd")
+plot(rj_raster_calphi)
+
+#Salvando em formato GTiff
+writeRaster(rj_raster_calphi,filename = "rj_calphi.tif",format="GTiff")
+#Colocando o caminho da pasta que eu quero que ele fique
+writeRaster(rj_raster_calphi,filename = "./Results/spatial_data/rj_calphi.tif",format="GTiff")
+
+
+
+##Calculando a área dos nodes
+rj_calphi2<-raster("./Results/spatial_data/rj_calphi.tif")
+
+rj_calphi2[rj_calphi2[]>1]<-NA  #tudo o que não for fragmento florestal fica de fora. Tudo > 1 vira NA
+
+plot(rj_calphi2)
+
+nodes <- clump(rj_calphi2) #diferencia as manchas existentes na paisagem
+plot(nodes)
+
+n.nodes <- max(unique(nodes)) #só um comando que mostra que o clump deu certo e possuem 3 manchas na paisagem modelo; preciso para o looping!!!
 
 tamanhos <- vector()
 
-for(i in 1: n.manchas){
+for(i in 1: n.nodes){
 
-  pixels.da.mancha <- which(manchas[]==i)
-  tam.mancha <- length(pixels.da.mancha)  #conta quantos pixels tem na mancha
-  tam.mancha.m2 <- tam.mancha*30*30 # pixel de 30m x 30m
-  tamanhos[i] <- tam.mancha.m2            #coloca os valores no objeto "tamanhos" que está vazio
+  pixels.do.node <- which(nodes[]==i)
+  tam.node <- length(pixels.do.node)  #conta quantos pixels tem na mancha
+  tam.node.m2 <- tam.node*30*30 # pixel de 30m x 30m
+  tamanhos[i] <- tam.node.m2            #coloca os valores no objeto "tamanhos" que está vazio
 
 }
 
 tamanhos # em m2
 
-
-### salvando os arquivos nodes
-XXXXX
-
-
-
-
+# salvando os arquivos nodes
+write.table(tamanhos,file="./Results/spatial_data/tamanho_nodes_m2",sep="\t")
 
 
 
 ## Distancias-euclidianas (so pra testar)
-mF <- manchas
+mF <- nodes
 
 dF <- as.data.frame(mF, xy=TRUE, na.rm=TRUE)
 dF <- dF[dF[,3] > 0,]
