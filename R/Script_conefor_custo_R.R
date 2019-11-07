@@ -14,7 +14,7 @@ rio_de_janeiro<-raster("C:/Users/Rhian/Documents/Biblioteca/Shapes&raster/Rio_de
 rio_de_janeiro
 plot(rio_de_janeiro)
 
-##COMO VER OS VALORES DA TA
+##COMO VER OS VALORES DA TA?????
 
 #reclassificando a TA (vi no ArcMap)
 #precisa criar uma matriz com os valores antigos, os novos e o nº de linhas e colunas
@@ -29,23 +29,24 @@ rj_raster_calphi<-raster("C:/Users/Rhian/Documents/Mestrado/Mestrado_serio/rj_ra
 plot(rj_raster_calphi)
 
 #Salvando em formato GTiff
-writeRaster(rj_raster_calphi,filename = "rj_calphi.tif",format="GTiff")
 #Colocando o caminho da pasta que eu quero que ele fique
-writeRaster(rj_raster_calphi,filename = "./Results/spatial_data/rj_calphi.tif",format="GTiff")
+writeRaster(rj_raster_calphi,filename = "./Data/dados_espaciais/R_mapas/rj_calphi.tif",format="GTiff")
 
 
 
 ##Calculando a área dos nodes
-rj_calphi2<-raster("./Results/spatial_data/rj_calphi.tif")
+rj_calphi<-raster("./Data/dados_espaciais/R_mapas/rj_calphi.tif")
 
-rj_calphi2[rj_calphi2[]>1]<-NA  #tudo o que não for fragmento florestal fica de fora. Tudo > 1 vira NA
+plot(rj_calphi)
 
-plot(rj_calphi2)
+rj_calphi[rj_calphi[]>1]<-NA  #tudo o que não for fragmento florestal fica de fora. Tudo > 1 vira NA
 
-nodes <- clump(rj_calphi2) #diferencia as manchas existentes na paisagem
+plot(rj_calphi)
+
+nodes <- clump(rj_calphi) #diferencia as manchas existentes na paisagem
 plot(nodes)
 
-n.nodes <- max(unique(nodes)) #só um comando que mostra que o clump deu certo e possuem 3 manchas na paisagem modelo; preciso para o looping!!!
+n.nodes <- max(unique(nodes)) #só um comando que mostra que o clump deu certo e possuem N manchas na paisagem ; preciso para o looping!!!
 
 tamanhos <- vector()
 
@@ -61,16 +62,20 @@ for(i in 1: n.nodes){
 tamanhos # em m2
 
 # salvando os arquivos nodes
-write.table(tamanhos,file="./Results/spatial_data/tamanho_nodes_m2",sep="\t")
+write.table(tamanhos,file="./Data/dados_espaciais/R_area_dist/tamanho_nodes_m2",sep="\t")
 
 
-
-## Distancias-euclidianas (so pra testar)
+## Distancias-euclidianas
 mF <- nodes
 
-dF <- as.data.frame(mF, xy=TRUE, na.rm=TRUE)
+#transforma os dados de Raster um em data frame (NÃO SEI PQ SE FAZ ISSO!)
+dF <- as.data.frame(mF, #objeto dos fragmentos
+                    xy=TRUE, #retorna a coordenada geográfica
+                    na.rm=TRUE) #remove linhas com valores de NA
+
 dF <- dF[dF[,3] > 0,]
 pd <- pointDistance(dF[,1:2], lonlat=FALSE)
+memory.limit(size=NA)
 
 
 pd <- as.matrix(as.dist(pd))
