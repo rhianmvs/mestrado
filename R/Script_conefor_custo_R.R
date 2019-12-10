@@ -9,32 +9,45 @@ library(rJava)
 library(RArcInfo)
 
 #imputando meu mapa do mapbiomas
-rio_de_janeiro<-raster("C:/Users/Rhian/Documents/Biblioteca/Shapes&raster/Rio_de_Janeiro/mapbiomas-riodejaneiro-riodejaneiro-2018.tif")
+
+rio_de_janeiro<-raster("./Data/dados_espaciais/rio_de_janeiroProjectUTM.tif")
+
+#-------------------------------------------------------------------------
 
 rio_de_janeiro
+
 plot(rio_de_janeiro)
+
+#--------------------------------------------------------------------------
 
 ##COMO VER OS VALORES DA TA?????
 
 #reclassificando a TA (vi no ArcMap)
+
 #precisa criar uma matriz com os valores antigos, os novos e o nº de linhas e colunas
 matriz_reclass_calphi<-matrix(data=c(0,3,5,13,15,19,21,23,24,25,29,30,32,33,NA,1,2,3,4,4,4,5,6,7,8,9,2,10),nrow=14,ncol=2) #valores para caluromys philander
 
 reclassify(x = rio_de_janeiro, #objeto raster
            rcl = matriz_reclass_calphi, #matriz criada com os valores de origem e destino
-           filename="rj_raster_calphi") #nome do arquivo de output
+           filename="rj_raster_calphi",
+           overwrite=T) #nome do arquivo de output
+
+#--------------------------------------------------------------------------------
 
 ##Leitura do novo raster reclassificado (precisa puxar ele na pasta de origem onde ele é salvo)
+
 rj_raster_calphi<-raster("C:/Users/Rhian/Documents/Mestrado/Mestrado_serio/rj_raster_calphi.grd")
 plot(rj_raster_calphi)
 
 #Salvando em formato GTiff
 #Colocando o caminho da pasta que eu quero que ele fique
-writeRaster(rj_raster_calphi,filename = "./Data/dados_espaciais/R_mapas/rj_calphi.tif",format="GTiff")
 
+writeRaster(rj_raster_calphi,filename = "./Data/dados_espaciais/R_mapas/rj_calphi.tif",format="GTiff", overwrite=T)
 
+#---------------------------------------------------------------------------------
 
 ##Calculando a área dos nodes
+
 rj_calphi<-raster("./Data/dados_espaciais/R_mapas/rj_calphi.tif")
 
 plot(rj_calphi)
@@ -64,6 +77,7 @@ tamanhos # em m2
 # salvando os arquivos nodes
 write.table(tamanhos,file="./Data/dados_espaciais/R_area_dist/tamanho_nodes_m2",sep="\t")
 
+#-------------------------------------------------------------------------------
 
 ## Distancias-euclidianas
 mF <- nodes
