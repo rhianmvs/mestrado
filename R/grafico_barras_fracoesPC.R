@@ -1,17 +1,13 @@
-##Grafico de barras fracoes de dPC
-
-install.packages("tidyverse")
-install.packages("gapminder")
-install.packages("forcats")
+##Grafico de barras fracoes de dPC dos fragmentos mais relevantes
 
 library(dplyr)
 library(tidyverse)
 library(gapminder)
 library(forcats)
 
-read.csv("./fragmentos_relevantes_sem3.csv")
+read.csv("./fragmentos_relevantes.csv")
 
-frag_relev<-read.csv("./fragmentos_relevantes_sem3.csv")
+frag_relev<-read.csv("./fragmentos_relevantes.csv")
 
 
 #############################################################
@@ -38,7 +34,7 @@ cores_bar<-c("black", "darkgray", "white")
 
 barplot(a,
         xlab = "Capacidade de dispersão",
-        ylim = c(0,20),
+        ylim = c(0,200),
         col = cores_bar,
         legend = T, args.legend = list(x = "topleft"))
 
